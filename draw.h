@@ -3,14 +3,30 @@
 #define WIDTH 300
 #define HEIGHT 100
 
-struct color
+struct _color
 {
     unsigned char r;
     unsigned char g;
     unsigned char b;
 };
+typedef struct _color Color;
 
-typedef struct color Color;
+struct _bit_image{
+    unsigned short w;
+    unsigned short h;
+    unsigned char* data;
+};
+typedef struct _bit_image BitImage;
+
+struct _text
+{
+    unsigned short x;
+    unsigned short y;
+    unsigned short text_len;
+    char* text;
+};
+typedef struct _text Text;
+
 
 #define LOCALRUN
 #ifdef LOCALRUN
@@ -103,17 +119,44 @@ void fill_rectangle(unsigned short x1, unsigned short y1, unsigned short x2, uns
 }
 
 
-void draw_bit_image(unsigned short x, unsigned short y, unsigned short w, unsigned short h, Color color, unsigned char* image)
+void draw_bit_image(unsigned short x, unsigned short y, BitImage bit_image, Color color)
 {
-    for (unsigned short i = 0; i < h; i++)
+    for (unsigned short i = 0; i < bit_image.h; i++)
     {
-        for (unsigned short j = 0; j < w; j++)
+        for (unsigned short j = 0; j < bit_image.w; j++)
         {
-            if (get_bit(image, i * w + j))
-                draw_pixel(x + i, h + j, color);
+            if (get_bit(bit_image.data, i * bit_image.w + j))
+                draw_pixel(x + i, y + j, color);
+        }
+    }
+}
+
+
+void set_bit_image_pixel(BitImage* image, unsigned short x, unsigned short y, unsigned char val)
+{
+    set_bit(image->data, x + image->w * y, val);
+}
+
+
+BitImage test_image(unsigned short size)
+{
+    BitImage returner;
+    returner.h = size;
+    returner.w = size;
+    returner.data = (unsigned char*) malloc((size * size)/8 + 1);
+    memset(returner.data, 0, (size * size)/8 + 1);
+    for (unsigned short i = 0; i < size; i++)
+    {
+        set_bit_image_pixel(&returner, i, i, 1);
+        set_bit_image_pixel(&returner, size - i - 1, i, 1);
+
+        if (i < size - 1){
+            set_bit_image_pixel(&returner, i, i + 1, 1);
+            set_bit_image_pixel(&returner, size - i - 1, i + 1, 1);
         }
     }
     
+    return returner;
 }
 
 
