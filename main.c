@@ -20,8 +20,13 @@ int main(int argc, char** argv)
     color.g = 235;
     color.b = 45;
 
-    BitImage test = test_image(16);
-    draw_bit_image(0, 0, test, color);
+    Text text;
+    text.text = "hej";
+    text.text_len = 3;
+    text.x = 10;
+    text.y = 20;
+
+    draw_text(text, 18, color);
 
     for (size_t i = 0; i < 1000; i++)
     {

@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "Ubuntu-B.h"
 
 #define WIDTH 300
 #define HEIGHT 100
@@ -157,6 +158,21 @@ BitImage test_image(unsigned short size)
     }
     
     return returner;
+}
+
+
+void draw_text(Text text, unsigned short letter_spacing, Color color)
+{
+    BitImage holder;
+    holder.h = letter_dimension;
+    holder.w = letter_dimension;
+    for (unsigned short i = 0; i < text.text_len; i++)
+    {
+        holder.data = _letters + (text.text[i] - 32) * letter_size;
+        draw_bit_image(text.x + i * letter_spacing, text.y, holder, color);
+    }
+    printf("\n");
+    
 }
 
 
