@@ -21,12 +21,12 @@ int main(int argc, char** argv)
     color.b = 45;
 
     Text text;
-    text.text = "hej";
-    text.text_len = 3;
+    text.text = "Ropsten";
+    text.text_len = 7;
     text.x = 10;
     text.y = 20;
 
-    draw_text(text, 18, color);
+    draw_text(text, 16, color);
 
     for (size_t i = 0; i < 1000; i++)
     {

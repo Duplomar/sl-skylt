@@ -122,12 +122,12 @@ void fill_rectangle(unsigned short x1, unsigned short y1, unsigned short x2, uns
 
 void draw_bit_image(unsigned short x, unsigned short y, BitImage bit_image, Color color)
 {
-    for (unsigned short i = 0; i < bit_image.h; i++)
+    for (unsigned short w = 0; w < bit_image.w; w++)
     {
-        for (unsigned short j = 0; j < bit_image.w; j++)
+        for (unsigned short h = 0; h < bit_image.h; h++)
         {
-            if (get_bit(bit_image.data, i * bit_image.w + j))
-                draw_pixel(x + i, y + j, color);
+            if (get_bit(bit_image.data, h * bit_image.w + w))
+                draw_pixel(x + w, y + h, color);
         }
     }
 }
@@ -147,15 +147,7 @@ BitImage test_image(unsigned short size)
     returner.data = (unsigned char*) malloc((size * size)/8 + 1);
     memset(returner.data, 0, (size * size)/8 + 1);
     for (unsigned short i = 0; i < size; i++)
-    {
-        set_bit_image_pixel(&returner, i, i, 1);
-        set_bit_image_pixel(&returner, size - i - 1, i, 1);
-
-        if (i < size - 1){
-            set_bit_image_pixel(&returner, i, i + 1, 1);
-            set_bit_image_pixel(&returner, size - i - 1, i + 1, 1);
-        }
-    }
+        set_bit_image_pixel(&returner, size/2, i , 1);
     
     return returner;
 }

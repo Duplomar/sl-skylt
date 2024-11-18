@@ -3,10 +3,13 @@ from sys import argv
 from pathlib import Path
 
 def bitstring_to_bytes(s):
-    return int(s, 2).to_bytes(len(s) // 8 + 1, byteorder='big')
+    return int(s, 2).to_bytes(len(s) // 8 + 1, byteorder='little')
+
 
 signs = [chr(c) for c in range(32, 127)] + list("åäöÅÄÖ")
-size = 16
+size = 32
+
+
 input_font = Path(argv[1])
 fnt = ImageFont.truetype(input_font, size=size)
 
@@ -21,8 +24,10 @@ with output.open("w") as f:
         height = fnt.size
         im = Image.new("1", (width, height), 0)
         draw = ImageDraw.Draw(im)
-        
         draw.text((0, 0), c, 1, font=fnt)
+
+        im = im.rotate(180)
+
         byte_string = bitstring_to_bytes("".join([str(int(bit)) for bit in im.getdata()]))
         c_byte_array = ", ".join(["0x" + byte for byte in byte_string.hex(":").split(":")])
         if c != signs[-1]:
