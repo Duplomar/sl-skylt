@@ -143,17 +143,37 @@ int get_time_diff_min(Week a, Week b)
 {
     int diff = (a.day * 1440 + a.hour * 60 + a.min);
     diff -= (b.day * 1440 + b.hour * 60 + b.min);
+    return diff;
 }
 
 
-unsigned short get_current_departure_index(Week current_time)
+unsigned short lin_search_current_departure_index(Week current_time, unsigned short i)
+{
+    if (compare_time(current_time, departures[i].departure_time) < 0)
+        return i;
+
+    while(i < num_departures - 1)
+    {
+        short lower_comp = compare_time(current_time, departures[i].departure_time);
+        i++;
+        short higher_comp = compare_time(current_time, departures[i].departure_time);
+
+        if (lower_comp > 0 && higher_comp < 0)
+            return i;
+    } 
+    return 0;
+
+}
+
+unsigned short bin_search_current_departure_index(Week current_time)
 {
     unsigned short low, high, i;
     low = 0;
     high = num_departures - 1;
     i = high/2;
     while (low < high)
-    {
+    {   
+
         short lower_comp = compare_time(current_time, departures[i].departure_time);
         if (i + 1 >= num_departures)
             return 0;

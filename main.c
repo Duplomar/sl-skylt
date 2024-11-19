@@ -23,14 +23,21 @@ int main(int argc, char** argv)
     struct tm * timeinfo;
 
     //pthread_create(&connection_th, NULL, connection_handler, NULL);
-
-    Departure* current_dep = &departures[get_current_departure_index(now)];
+    
+    // Get time
+    time(&raw_now);
+    timeinfo = localtime(&raw_now);
+    now.day = timeinfo->tm_wday;
+    now.hour = timeinfo->tm_hour;
+    now.min = timeinfo->tm_min;
+    now.sec = timeinfo->tm_sec;
+    unsigned short current_dep = bin_search_current_departure_index(now);
     Text current_dep_dest = {
         .x = 50, 
         .y = 10, 
         .banner_offset = 0, 
-        .text = current_dep->dest_name, 
-        .text_len = current_dep->dest_name_size
+        .text = departures[current_dep].dest_name, 
+        .text_len = departures[current_dep].dest_name_size
     };
 
     Text current_dep_line = {
@@ -40,7 +47,7 @@ int main(int argc, char** argv)
         .text = (char*) malloc(6), 
         .text_len = 0
     };
-    current_dep_line.text_len = sprintf(current_dep_line.text, "%u", current_dep->line_num);
+    current_dep_line.text_len = sprintf(current_dep_line.text, "%u", departures[current_dep].line_num);
 
     Text current_dep_time = {
         .x = 200, 
@@ -59,11 +66,17 @@ int main(int argc, char** argv)
         now.hour = timeinfo->tm_hour;
         now.min = timeinfo->tm_min;
         now.sec = timeinfo->tm_sec;
+        
+        
+        current_dep = lin_search_current_departure_index(now, current_dep);
+        current_dep_dest.text = departures[current_dep].dest_name, 
+        current_dep_dest.text_len = departures[current_dep].dest_name_size;
 
-        print_week(now);
-        print_week(current_dep->departure_time);
+        //print_week(now);
 
-        current_dep_time.text_len = sprintf(current_dep_time.text, "%u min", get_time_diff_min(current_dep->departure_time, now));
+        current_dep_line.text_len = sprintf(current_dep_line.text, "%u", departures[current_dep].line_num);
+        current_dep_time.text_len = sprintf(current_dep_time.text, "%u min", get_time_diff_min(departures[current_dep].departure_time, now));
+        current_dep_time.x = WIDTH - (current_dep_time.text_len - 1) * 16 - letter_dimension;
         
         draw_text(&current_dep_line, 16, color);
         draw_text(&current_dep_dest, 16, color);
