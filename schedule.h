@@ -61,7 +61,8 @@ void load_departures(const char* filename)
                         while (buffer[char_holder] == ' ' || buffer[char_holder] == '\n')
                             char_holder++;
 
-                        departures[curr_dep_index].dest_name = (char*) malloc(buff_index - char_holder);
+                        departures[curr_dep_index].dest_name = (char*) malloc(buff_index - char_holder + 1);
+                        departures[curr_dep_index].dest_name_size = buff_index - char_holder;
                         strcpy(departures[curr_dep_index].dest_name, buffer + char_holder);
                         state = departures_time;
                         break;
@@ -114,7 +115,7 @@ const char* weekdays[] = {
 
 void print_week(Week week)
 {
-    printf("dag %s, time %d, minut %d, sekund %d\n", weekdays[week.day], week.hour, week.min, week.sec);
+    printf("dag %s, timme %d, minut %d, sekund %d\n", weekdays[week.day], week.hour, week.min, week.sec);
 }
 
 void print_departure(Departure departure)
@@ -136,6 +137,12 @@ short compare_time(Week a, Week b)
         return a.min - b.min;
 
     return a.sec - b.sec;
+}
+
+int get_time_diff_min(Week a, Week b)
+{
+    int diff = (a.day * 1440 + a.hour * 60 + a.min);
+    diff -= (b.day * 1440 + b.hour * 60 + b.min);
 }
 
 

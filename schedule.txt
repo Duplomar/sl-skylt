@@ -1,6 +1,7 @@
 5
-14;Ropsten;0.0.0.30;
+14;Högdalen;0.0.0.30;
 11;Bandhagen;0.0.0.45;
-14;Ropsten;0.0.0.50;
-14;Ropsten;0.0.1.30;
-14;Ropsten;4.1.10.0;
+14;Stureby;0.0.0.50;
+14;Svedmyra;0.0.1.30;
+14;Sockenplan;2.5.30.30;
+14;Enskede Gård;4.1.10.0;

@@ -6,14 +6,14 @@ def bitstring_to_bytes(s):
     return int(s, 2).to_bytes(len(s) // 8 + 1, byteorder='little')
 
 
-signs = [chr(c) for c in range(32, 127)] + list("åäöÅÄÖ")
-size = 32
+signs = [chr(c) for c in range(32, 127)] + list("ÅÄÖåäö")
+size = 20
 
 
 input_font = Path(argv[1])
 fnt = ImageFont.truetype(input_font, size=size)
 
-output = Path(".") / f"{input_font.stem}.h"
+output = Path("fonts") / f"{input_font.stem}.h"
 with output.open("w") as f:
     f.write(f"const unsigned short letter_dimension = {size};\n")
     f.write(f"const unsigned short letter_size = {(size * size)//8 + 1};\n")
