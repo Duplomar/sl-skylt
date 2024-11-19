@@ -3,21 +3,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct week
-{
-    char sec;
-    char min;
-    char hour;
-    char day;
-};
-typedef struct week Week;
+#define MINUTE 60
+#define HOUR 3600
+#define DAY 86400
+#define WEEK 604800
 
 struct departure
 {
-    Week departure_time; // Time for departure. Only fields for one week
+    int departure_time; // Time for departure, in seconds since start of week. Only fields for one week
     unsigned short line_num;
     unsigned char dest_name_size;
     char* dest_name;
+
 };
 typedef struct departure Departure;
 
@@ -72,19 +69,19 @@ void load_departures(const char* filename)
                         while (buffer[char_holder] != '.')
                             char_holder--;
                         buffer[char_holder] = 0;
-                        departures[curr_dep_index].departure_time.sec = atoi(buffer + char_holder + 1);
+                        departures[curr_dep_index].departure_time = atoi(buffer + char_holder + 1);
 
                         while (buffer[char_holder] != '.')
                             char_holder--;
                         buffer[char_holder] = 0;
-                        departures[curr_dep_index].departure_time.min = atoi(buffer + char_holder + 1);
+                        departures[curr_dep_index].departure_time += MINUTE * atoi(buffer + char_holder + 1);
 
                         while (buffer[char_holder] != '.')
                             char_holder--;
                         buffer[char_holder] = 0;
-                        departures[curr_dep_index].departure_time.hour = atoi(buffer + char_holder + 1);
+                        departures[curr_dep_index].departure_time += HOUR * atoi(buffer + char_holder + 1);
 
-                        departures[curr_dep_index].departure_time.day = atoi(buffer);
+                        departures[curr_dep_index].departure_time += DAY * atoi(buffer);
 
                         curr_dep_index++;
                         state = line_number;
@@ -113,9 +110,22 @@ const char* weekdays[] = {
     "lördag",
 };
 
-void print_week(Week week)
+void print_week(int time)
 {
-    printf("dag %s, timme %d, minut %d, sekund %d\n", weekdays[week.day], week.hour, week.min, week.sec);
+    unsigned short holder;
+    holder = time / DAY;
+    printf("dag %s, ", weekdays[holder]);
+    time -= holder * DAY;
+    
+    holder = time / HOUR;
+    printf("timme %d, ", holder);
+    time -= holder * HOUR;
+
+    holder = time / MINUTE;
+    printf("minut %d, ", holder);
+    time -= holder * MINUTE;
+
+    printf("sekund %d\n", time);
 }
 
 void print_departure(Departure departure)
@@ -124,48 +134,13 @@ void print_departure(Departure departure)
     print_week(departure.departure_time);
 }
 
-//Naive comparison of a and b, based on month only
-short compare_time(Week a, Week b)
+
+int get_time_diff_min(int a, int b)
 {
-    if (a.day != b.day)
-        return a.day - b.day;
-    
-    if (a.hour != b.hour)
-        return a.hour - b.hour;
-
-    if (a.min != b.min)
-        return a.min - b.min;
-
-    return a.sec - b.sec;
+    return (a - b)/MINUTE + 1;
 }
 
-int get_time_diff_min(Week a, Week b)
-{
-    int diff = (a.day * 1440 + a.hour * 60 + a.min);
-    diff -= (b.day * 1440 + b.hour * 60 + b.min);
-    return diff;
-}
-
-
-unsigned short lin_search_current_departure_index(Week current_time, unsigned short i)
-{
-    if (compare_time(current_time, departures[i].departure_time) < 0)
-        return i;
-
-    while(i < num_departures - 1)
-    {
-        short lower_comp = compare_time(current_time, departures[i].departure_time);
-        i++;
-        short higher_comp = compare_time(current_time, departures[i].departure_time);
-
-        if (lower_comp > 0 && higher_comp < 0)
-            return i;
-    } 
-    return 0;
-
-}
-
-unsigned short bin_search_current_departure_index(Week current_time)
+unsigned short bin_search_current_departure_index(int current_time)
 {
     unsigned short low, high, i;
     low = 0;
@@ -174,10 +149,10 @@ unsigned short bin_search_current_departure_index(Week current_time)
     while (low < high)
     {   
 
-        short lower_comp = compare_time(current_time, departures[i].departure_time);
+        int lower_comp = current_time - departures[i].departure_time;
         if (i + 1 >= num_departures)
             return 0;
-        short higher_comp = compare_time(current_time, departures[i + 1].departure_time);
+        int higher_comp = current_time - departures[i + 1].departure_time;
 
         if (lower_comp < 0)
             high = i;

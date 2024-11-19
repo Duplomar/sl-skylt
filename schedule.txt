@@ -1,7 +1,8 @@
-5
-14;Högdalen;0.0.0.30;
-11;Bandhagen;1.0.0.45;
-14;Stureby;2.12.36.50;
-14;Svedmyra;2.12.40.30;
-14;Sockenplan;4.5.30.30;
-14;Enskede Gård;5.1.10.0;
+7
+1;Högdalen;0.0.0.30;
+2;Bandhagen;1.0.0.45;
+3;Stureby;2.12.36.50;
+4;Svedmyra;3.17.50.0;
+5;Sockenplan;4.5.30.30;
+6;Enskede Gård;5.1.10.0;
+7;Globen;6.1.10.0;

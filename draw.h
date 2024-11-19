@@ -1,7 +1,7 @@
 #include "utils.h"
-#include "fonts/UbuntuMono-R.h"
+#include "fonts/UbuntuMono-B.h"
 
-#define WIDTH 300
+#define WIDTH 500
 #define HEIGHT 100
 
 struct _color
@@ -83,7 +83,7 @@ void draw_pixel(short x, short y, Color color)
     SDL_RenderDrawPoint(renderer, x, y);
 }
 
-int render()
+int handle_events()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -92,7 +92,11 @@ int render()
             return 1;
         }
     }
+}
 
+int render()
+{
+    printf("Rendering\n");
     // Reset render target to the screen
     SDL_SetRenderTarget(renderer, NULL);
 
@@ -106,7 +110,6 @@ int render()
     // Set the render target back to the texture
     SDL_SetRenderTarget(renderer, lowResTexture);
 
-    SDL_Delay(20);
     return 0;
 }
 #endif
@@ -222,11 +225,15 @@ void _draw_text(Text* text, short letter_spacing, Color color)
     }
 }
 
-void draw_text(Text* text, short letter_spacing, Color color)
+void clear_screen()
+{
+    draw_rectangle(0, 0, WIDTH, HEIGHT, background_color);
+}
+
+void clear_text_area(Text* text, short letter_spacing)
 {
     const unsigned short text_w = get_text_drawn_width(*text, letter_spacing);
 
-    // Clear the area before drawing
     draw_rectangle(
         text->x + text->banner_offset, 
         text->y, 
@@ -234,7 +241,10 @@ void draw_text(Text* text, short letter_spacing, Color color)
         text->y + letter_dimension,
         background_color
     );
-
+}
+void draw_text(Text* text, short letter_spacing, Color color)
+{
+    const unsigned short text_w = get_text_drawn_width(*text, letter_spacing);
     // Move the text if it is too long
     if (text_w + text->x > WIDTH){
         text->banner_offset -= 1;
