@@ -1,5 +1,5 @@
 #include "utils.h"
-#include "fonts/UbuntuMono-B.h"
+#include "fonts/UbuntuMono-R.h"
 
 #define WIDTH 500
 #define HEIGHT 100
@@ -25,10 +25,21 @@ struct _text
     short x;
     short y;
     unsigned short text_len; // num char in the text
-    short banner_offset; // Used if text is too long for screen
     char* text;
+    short letter_spacing;
+    Color color;
 };
 typedef struct _text Text;
+
+struct _textstrip
+{
+    char rolling;
+
+    Text destination;
+    Text line_num;
+    Text dep_time;
+};
+typedef struct _textstrip TextStrip;
 
 
 #define LOCALRUN
@@ -96,7 +107,6 @@ int handle_events()
 
 int render()
 {
-    printf("Rendering\n");
     // Reset render target to the screen
     SDL_SetRenderTarget(renderer, NULL);
 
@@ -146,34 +156,19 @@ void set_bit_image_pixel(BitImage* image, unsigned short x, unsigned short y, un
     set_bit(image->data, x + image->w * y, val);
 }
 
-
-BitImage test_image(unsigned short size)
-{
-    BitImage returner;
-    returner.h = size;
-    returner.w = size;
-    returner.data = (unsigned char*) malloc((size * size)/8 + 1);
-    memset(returner.data, 0, (size * size)/8 + 1);
-    for (unsigned short i = 0; i < size; i++)
-        set_bit_image_pixel(&returner, size/2, i , 1);
-    
-    return returner;
-}
-
-
-unsigned short get_text_drawn_width(Text text, short letter_spacing)
+unsigned short get_text_drawn_width(Text* text)
 {
     unsigned short width = 0;
-    for (unsigned short i = 0; i < text.text_len - 1; i++)
+    for (unsigned short i = 0; i < text->text_len - 1; i++)
     {
-        if (text.text[i] != -61 )
-            width += letter_spacing;
+        if (text->text[i] != -61 )
+            width += text->letter_spacing;
     }
     return width + letter_dimension;
 
 }
 
-void _draw_text(Text* text, short letter_spacing, Color color)
+void draw_text(Text* text)
 {
     BitImage holder;
     holder.h = letter_dimension;
@@ -182,7 +177,7 @@ void _draw_text(Text* text, short letter_spacing, Color color)
     short offset = 0;
     for (unsigned short i = 0; i < text->text_len; i++)
     {
-        short letter_x = text->x + text->banner_offset + offset;
+        short letter_x = text->x + offset;
         short letter_index;
         if (text->text[i] == -61 ){
             i++;
@@ -219,8 +214,8 @@ void _draw_text(Text* text, short letter_spacing, Color color)
         {
             holder.data = _letters + letter_index;
             if(letter_x + letter_dimension >= 0 && letter_x< WIDTH)
-                draw_bit_image(letter_x, text->y, holder, color);
-            offset += letter_spacing;
+                draw_bit_image(letter_x, text->y, holder, text->color);
+            offset += text->letter_spacing;
         }
     }
 }
@@ -230,27 +225,50 @@ void clear_screen()
     draw_rectangle(0, 0, WIDTH, HEIGHT, background_color);
 }
 
-void clear_text_area(Text* text, short letter_spacing)
+void clear_text_area(Text* text)
 {
-    const unsigned short text_w = get_text_drawn_width(*text, letter_spacing);
+    const unsigned short text_w = get_text_drawn_width(text);
 
     draw_rectangle(
-        text->x + text->banner_offset, 
+        text->x, 
         text->y, 
-        text->x + text->banner_offset + text_w, 
+        text->x + text_w, 
         text->y + letter_dimension,
         background_color
     );
 }
-void draw_text(Text* text, short letter_spacing, Color color)
+
+
+void draw_text_strip(TextStrip* strip)
 {
-    const unsigned short text_w = get_text_drawn_width(*text, letter_spacing);
-    // Move the text if it is too long
-    if (text_w + text->x > WIDTH){
-        text->banner_offset -= 1;
-        if (text_w + text->x + text->banner_offset < 0)
-            text->banner_offset = WIDTH - text->x;
+    unsigned short i;
+    Text* stip_texts[] = {&(strip->line_num), &(strip->destination), &(strip->dep_time)};
+    if(strip->rolling)
+    {
+        short right_edge = -1;
+        short left_edge = WIDTH;
+        for (i = 0; i < 3; i++)
+        {
+            clear_text_area(stip_texts[i]);
+            stip_texts[i]->x--;
+            unsigned short text_w = get_text_drawn_width(stip_texts[i]);
+
+            if (stip_texts[i]->x + text_w > right_edge)
+                right_edge = stip_texts[i]->x + text_w > right_edge;
+
+            if (stip_texts[i]->x < left_edge)
+                left_edge = stip_texts[i]->x;
+            
+        }
+        
+        // Move back to the furthest right
+        if (right_edge < 0)
+        {
+            for (i = 0; i < 3; i++)
+                stip_texts[i]->x += (WIDTH - left_edge);
+        }
     }
-    
-    _draw_text(text, letter_spacing, color);
+
+    for (i = 0; i < 3; i++)
+        draw_text(stip_texts[i]);
 }
